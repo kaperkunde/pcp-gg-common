@@ -27,6 +27,10 @@ requests; each one is read by a person before it is merged.
   across restarts.
 - **A health check** where the service has one, and `registers` set to what
   PCP should add for it.
+- **No privileges but a VPN's.** Only an exit (`registers` kind `exit`) may
+  ask for `cap_add: [NET_ADMIN]` and `devices: [/dev/net/tun]`, and PCP
+  takes nothing else. Its proxy takes the login PCP makes (`auth`), never
+  one written here.
 
 ## What a reviewer checks
 
