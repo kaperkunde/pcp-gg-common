@@ -15,6 +15,7 @@ text you can read before your PCP does anything with it.
 | --- | --- |
 | [`services/docling.yaml`](services/docling.yaml) | [Docling Serve](https://github.com/docling-project/docling-serve): turns PDFs, Office documents and images into Markdown, JSON or text, with OCR and tables. Runs on CPU; PCP adds its API as an endpoint, sending its key for you. |
 | [`services/gluetun.yaml`](services/gluetun.yaml) | [Gluetun](https://github.com/qdm12/gluetun): a VPN client (OpenVPN or WireGuard) for most VPN providers, or a WireGuard server of your own. PCP adds its proxy as an **exit**, so web fetch and the browser can go out through your VPN instead of from your PCP's address. |
+| [`services/text-embeddings-inference.yaml`](services/text-embeddings-inference.yaml) | [Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference) (Hugging Face): turns text into embeddings with a small open model, on CPU. PCP adds its API as an endpoint, sending its key for you, and can use it to search your tools, skills and memories by meaning (**Settings → Search**). |
 
 ### What each one needs
 
@@ -35,6 +36,11 @@ text you can read before your PCP does anything with it.
   for it, and PCP reaches it through the SSH connection. You add it on the
   SSH server's page in PCP (**Exits**, then **Add a VPN exit**), and each
   token may use the exit only once you allow it.
+- **Text Embeddings Inference**: Docker or Podman on the SSH server and one
+  secret of yours for its API key (`API_KEY`). You may type another model
+  (`MODEL_ID`, as Hugging Face names it); the default, `BAAI/bge-small-en-v1.5`,
+  is small and quick on a CPU. It downloads the model on first start into
+  its `models` volume, so the first start takes a minute or two.
 
 A raw WireGuard configuration (what wireproxy would take) goes into Gluetun
 as the `custom` provider above: wireproxy reads a configuration file, which
