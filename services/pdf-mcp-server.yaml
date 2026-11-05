@@ -1,8 +1,8 @@
 pcp_format: 3
-version: 1
+version: 2
 name: PDF MCP Server
 description: "pdf-mcp, in Kaperkunde's reviewed fork: reads, fills, edits, splits, merges, redacts, signs and OCRs PDFs (English and Dutch), as an MCP server with 57 tools, including put_file/get_file to move files in and out. It works only on files in its own data volume, and makes no network requests and no LLM calls."
-image: ghcr.io/kaperkunde/pdf-mcp-server@sha256:0d3801caf4f07800a6e6e80b8a2d3db3a9c5ec8f900561f6c4890c4151ca25b3
+image: ghcr.io/kaperkunde/pdf-mcp-server@sha256:53a3b7ce6a1ac22fa3b016081e9fef8021f569b0b484cfe29c3623984e95491a
 source: ghcr.io/kaperkunde/pdf-mcp-server:latest
 ports:
   - container: 8000
