@@ -1,13 +1,9 @@
-# TODO before this is pushed: replace the all-zero digest below with the one
-# .github/workflows/image.yml in kaperkunde/pdf-mcp-server prints for tag
-# kk-v2.0.0-1, check it with `docker buildx imagetools inspect
-# ghcr.io/kaperkunde/pdf-mcp-server:2.0.0`, and delete this comment.
 pcp_format: 3
 version: 1
 name: PDF MCP Server
 description: "pdf-mcp, in Kaperkunde's reviewed fork: reads, fills, edits, splits, merges, redacts, signs and OCRs PDFs (English and Dutch), as an MCP server with 53 tools. It works only on files in its own data volume, and makes no network requests and no LLM calls."
-image: ghcr.io/kaperkunde/pdf-mcp-server@sha256:0000000000000000000000000000000000000000000000000000000000000000
-source: ghcr.io/kaperkunde/pdf-mcp-server:2.0.0
+image: ghcr.io/kaperkunde/pdf-mcp-server@sha256:0d3801caf4f07800a6e6e80b8a2d3db3a9c5ec8f900561f6c4890c4151ca25b3
+source: ghcr.io/kaperkunde/pdf-mcp-server:latest
 ports:
   - container: 8000
 env:
