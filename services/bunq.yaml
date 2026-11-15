@@ -1,9 +1,9 @@
 pcp_format: 4
-version: 1
+version: 2
 name: bunq
 description: "bunq, in Kaperkunde's own client: reads your accounts and balances, payments (by date, amount and counterparty), payment requests, scheduled payments, cards (last four digits only) and minimal user info, and prepares draft payments in EUR to an IBAN, which only you can accept in the bunq app. As an MCP server with 9 tools: 8 read, create_draft_payment writes and moves no money. It refuses every other change at bunq, and connects to api.bunq.com only."
-image: ghcr.io/kaperkunde/bunq-mcp@sha256:edafa49c81884eef1ba4f17c6b5b7a4305b16dae689af845e69188fbbd0d0505
-source: ghcr.io/kaperkunde/bunq-mcp:main
+image: ghcr.io/kaperkunde/bunq-mcp@sha256:07a579adb252b226eaab96fe1081554f054b75fab3da1564c2b31795ffa76a22
+source: ghcr.io/kaperkunde/bunq-mcp:latest
 ports:
   - container: 8080
 env:
