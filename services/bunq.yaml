@@ -1,0 +1,39 @@
+pcp_format: 4
+version: 1
+name: bunq
+description: "bunq, in Kaperkunde's own client: reads your accounts and balances, payments (by date, amount and counterparty), payment requests, scheduled payments, cards (last four digits only) and minimal user info, and prepares draft payments in EUR to an IBAN, which only you can accept in the bunq app. As an MCP server with 9 tools: 8 read, create_draft_payment writes and moves no money. It refuses every other change at bunq, and connects to api.bunq.com only."
+image: ghcr.io/kaperkunde/bunq-mcp@sha256:edafa49c81884eef1ba4f17c6b5b7a4305b16dae689af845e69188fbbd0d0505
+source: ghcr.io/kaperkunde/bunq-mcp:main
+ports:
+  - container: 8080
+env:
+  - name: BUNQ_API_KEY
+    description: "Your bunq API key: in the bunq app, Profile → Security & Settings → Developers → API keys → Add API key. One service per bunq user (a personal key and a business key are two services)."
+    required: true
+  - name: MCP_AUTH_TOKEN
+    description: The token PCP sends to the service on every call, so nothing else on the server can use it. Use a long random secret.
+    required: true
+  - name: BUNQ_DRAFT_MAX_AMOUNT
+    description: The largest draft payment the service prepares, in EUR (500 or 250.00). Leave empty for no cap.
+    plain: true
+  - name: BUNQ_PERMITTED_IPS
+    description: Leave empty to tie the API key to the address it is first used from. If your public address changes (a home connection), type that address and * (192.0.2.1,*) to let the key work from any address; a change here registers the service with bunq again.
+    plain: true
+  - name: MCP_ALLOWED_HOSTS
+    description: Only if you publish it on an address of your network rather than 127.0.0.1, type that address and port (192.0.2.10:8080). Leave empty otherwise.
+    plain: true
+volumes:
+  - name: data
+    path: /data
+health:
+  kind: http
+  port: 8080
+  path: /health
+registers:
+  kind: mcp
+  port: 8080
+  path: /mcp
+  auth:
+    env: MCP_AUTH_TOKEN
+    header: Authorization
+    template: Bearer {{secret}}

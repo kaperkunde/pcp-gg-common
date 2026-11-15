@@ -17,6 +17,7 @@ text you can read before your PCP does anything with it.
 | [`services/gluetun.yaml`](services/gluetun.yaml) | [Gluetun](https://github.com/qdm12/gluetun): a VPN client (OpenVPN or WireGuard) for most VPN providers, or a WireGuard server of your own. PCP adds its proxy as an **exit**, so web fetch and the browser can go out through your VPN instead of from your PCP's address. |
 | [`services/text-embeddings-inference.yaml`](services/text-embeddings-inference.yaml) | [Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference) (Hugging Face): turns text into embeddings with a small open model, on CPU. PCP adds its API as an endpoint, sending its key for you, and can use it to search your tools, skills and memories by meaning (**Settings → Search**). |
 | [`services/pdf-mcp-server.yaml`](services/pdf-mcp-server.yaml) | [pdf-mcp](https://github.com/nfsarch33/pdf-mcp-server), from Kaperkunde's reviewed fork ([kaperkunde/pdf-mcp-server](https://github.com/kaperkunde/pdf-mcp-server)): reads, fills, edits, splits, merges, redacts, signs and OCRs PDFs. PCP adds it as an MCP server whose tools work only on the files in its own volume. |
+| [`services/bunq.yaml`](services/bunq.yaml) | [bunq](https://www.bunq.com), through Kaperkunde's own client ([kaperkunde/bunq-mcp](https://github.com/kaperkunde/bunq-mcp)): reads your accounts, balances, payments, payment requests, scheduled payments and cards, and prepares draft payments in EUR that only you can accept in the bunq app. PCP adds it as an MCP server; it talks to api.bunq.com only. |
 
 ### What each one needs
 
@@ -52,6 +53,7 @@ text you can read before your PCP does anything with it.
   OCR reads English and Dutch. PCP reaches it through the SSH connection,
   on `127.0.0.1`; if you publish it on an address of your network instead,
   type that address and port as `MCP_ALLOWED_HOSTS`.
+- **bunq**: Docker or Podman on the SSH server, a bunq API key (`BUNQ_API_KEY`, made in the bunq app under Profile → Security & Settings → Developers → API keys) and a long random token PCP sends it on every call (`MCP_AUTH_TOKEN`), both secrets of yours. One service per bunq user: a personal key and a business key are two services. It reads, and prepares draft payments only: no money moves until you accept a draft in the bunq app, and you may cap a draft's amount (`BUNQ_DRAFT_MAX_AMOUNT`). Payment descriptions and names come from whoever paid you, so an assistant should treat them as untrusted text. It keeps its bunq registration in its `data` volume and connects to api.bunq.com only ([what it does and how](https://github.com/kaperkunde/bunq-mcp#readme)). PCP reaches it through the SSH connection, on `127.0.0.1`.
 
 A raw WireGuard configuration (what wireproxy would take) goes into Gluetun
 as the `custom` provider above: wireproxy reads a configuration file, which
@@ -92,7 +94,7 @@ The files follow PCP's own layout for linked repositories, so a PCP reads
 them as it reads any repository you link:
 
 ```
-services/<name>.yaml    a service (pcp_format 3)
+services/<name>.yaml    a service (pcp_format 3, or 4 with a service's `auth` or `files`)
 README.md, LICENSE, …   nobody's item, left alone
 ```
 
