@@ -1,15 +1,16 @@
-pcp_format: 4
-version: 1
+pcp_format: 6
+version: 2
 name: Claude Code sessions
-description: "Your Claude Code cloud sessions (claude.ai/code), on your own claude.ai login: list them, see what one is doing, ask it a side question as /btw does (nothing added to its conversation), send it a message, interrupt it, answer its permission prompts (an allow names the exact input you approve), archive or rename it, or start a new one on a repository. As an MCP server with 15 tools: 6 read, 9 write. You sign in on PCP's pages; the login stays in the service's volume and no tool answers a token. It uses Claude Code's unofficial sessions API: for your own use only, never for other people's accounts."
-image: ghcr.io/kaperkunde/claude-sessions-mcp@sha256:311edf128605dc31cd2d552275d4bbb3e43b2a7ae3781095910c77646d1f3c2f
+description: "Your Claude Code cloud sessions (claude.ai/code), on your own claude.ai login: list them, see what one is doing, ask it a side question as /btw does (nothing added to its conversation), send it a message, interrupt it, answer its permission prompts (an allow names the exact input you approve) and the questions it asks you, archive or rename it, or start a new one on a repository. As an MCP server with 16 tools: 6 read, 10 write. You sign in on PCP's pages; the login stays in the service's volume and no tool answers a token. It uses Claude Code's unofficial sessions API: for your own use only, never for other people's accounts."
+image: ghcr.io/kaperkunde/claude-sessions-mcp@sha256:dc95f45ba3fcfc346a25a7aa4c8f18d0636161a8c7a0fdcfaf9315457b780a5a
 source: ghcr.io/kaperkunde/claude-sessions-mcp:latest
 ports:
   - container: 8080
 env:
   - name: MCP_AUTH_TOKEN
-    description: The token PCP sends to the service on every call, so nothing else on the server can use it. Use a long random secret.
+    description: The token PCP sends to the service on every call, so nothing else on the server can use it. PCP makes it, a long random one, when it launches the service.
     required: true
+    generated: true
   - name: MCP_ALLOWED_HOSTS
     description: Only if you publish it on an address of your network rather than 127.0.0.1, type that address and port (192.0.2.10:8080). Leave empty otherwise.
     plain: true
@@ -28,3 +29,16 @@ registers:
     env: MCP_AUTH_TOKEN
     header: Authorization
     template: Bearer {{secret}}
+signin:
+  style: paste_code
+  status:
+    tool: login_status
+    signed_in: signed_in
+    who: email
+  start:
+    tool: login_start
+    url: url
+    expires: expires_at
+  finish:
+    tool: login_finish
+    argument: code
