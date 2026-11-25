@@ -1,0 +1,28 @@
+pcp_format: 6
+version: 1
+name: Voyage 4 nano embeddings
+description: Self-hosted text embeddings with MongoDB's voyage-4-nano, a small multilingual model, on CPU, behind an OpenAI-compatible /v1/embeddings. PCP adds its API as an endpoint, sending the key it made for you, and can use it as the embeddings provider for search by meaning (Settings → Search). With "Tell the model whether a text is a query or a document" ticked there, it embeds a search query and the text searched differently, as the model is meant to. Needs about 1.5 GB of memory; the model is inside the image and nothing is downloaded or sent anywhere while it runs.
+image: ghcr.io/kaperkunde/voyage-nano-embeddings@sha256:52e52cf95597cb61cf9b0e00b2316fe49368c35207cdb5c22cd67424451960ed
+source: ghcr.io/kaperkunde/voyage-nano-embeddings:latest
+ports:
+  - container: 8000
+env:
+  - name: API_KEY
+    description: The key every request must send as a bearer token. PCP makes it, a long random one, when it launches the service, and sends it for you.
+    required: true
+    generated: true
+  - name: THREADS
+    description: How many processor threads the model may use. Leave empty to use all the cores the container may use; a lower number leaves room for other things on the machine.
+    plain: true
+health:
+  kind: http
+  port: 8000
+  path: /health
+registers:
+  kind: openapi
+  port: 8000
+  specPath: /openapi.json
+  auth:
+    env: API_KEY
+    header: Authorization
+    template: Bearer {{secret}}
