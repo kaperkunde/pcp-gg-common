@@ -1,0 +1,313 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenAI Images",
+    "version": "1.0.0",
+    "description": "OpenAI's Images API, trimmed to what PCP's generate_image uses: make a picture from a prompt, or change pictures you give it. Every call is billed to the OpenAI account whose API key you give PCP."
+  },
+  "servers": [
+    {
+      "url": "https://api.openai.com/v1"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/images/generations": {
+      "post": {
+        "operationId": "create_image",
+        "summary": "Generate an image",
+        "description": "Make a picture from a text prompt. The answer holds each picture as base64 (data[].b64_json), which PCP keeps as a file. Billed per picture.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "prompt"
+                ],
+                "properties": {
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32000,
+                    "description": "What the picture shows."
+                  },
+                  "model": {
+                    "type": "string",
+                    "default": "gpt-image-2",
+                    "description": "The image model. Current ones include gpt-image-2, gpt-image-1.5 and gpt-image-1-mini (cheaper); see OpenAI's image guide for the list and prices. Change the default here with an edit if you prefer another."
+                  },
+                  "n": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10,
+                    "default": 1,
+                    "description": "How many pictures to make. Each is billed."
+                  },
+                  "size": {
+                    "type": "string",
+                    "default": "auto",
+                    "description": "auto, or WIDTHxHEIGHT in pixels: 1024x1024 (square), 1536x1024 (landscape) or 1024x1536 (portrait); other sizes within OpenAI's limits are accepted by the GPT image models."
+                  },
+                  "quality": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "medium",
+                      "high",
+                      "auto"
+                    ],
+                    "default": "auto",
+                    "description": "low is cheaper and faster; high costs more."
+                  },
+                  "background": {
+                    "type": "string",
+                    "enum": [
+                      "transparent",
+                      "opaque",
+                      "auto"
+                    ],
+                    "default": "auto",
+                    "description": "transparent needs output_format png or webp."
+                  },
+                  "output_format": {
+                    "type": "string",
+                    "enum": [
+                      "png",
+                      "jpeg",
+                      "webp"
+                    ],
+                    "default": "png",
+                    "description": "The picture's file format."
+                  },
+                  "moderation": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "auto"
+                    ],
+                    "default": "auto",
+                    "description": "How strictly OpenAI filters the prompt."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The pictures, each base64 in data[].b64_json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagesResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "OpenAI refused the call: the body says why.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/edits": {
+      "post": {
+        "operationId": "create_image_edit",
+        "summary": "Edit an image",
+        "description": "Change pictures you give it, or build a new one from them, as the prompt says. The answer holds each picture as base64 (data[].b64_json), which PCP keeps as a file. Billed per picture.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "image[]",
+                  "prompt"
+                ],
+                "properties": {
+                  "image[]": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 16,
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "The picture or pictures to change or build on, as files (PNG, JPEG or WebP, each under 50 MB)."
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32000,
+                    "description": "What to change, or the picture to make from the ones given."
+                  },
+                  "model": {
+                    "type": "string",
+                    "default": "gpt-image-2",
+                    "description": "The image model. Current ones include gpt-image-2, gpt-image-1.5 and gpt-image-1-mini (cheaper); see OpenAI's image guide for the list and prices. Change the default here with an edit if you prefer another."
+                  },
+                  "n": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10,
+                    "default": 1,
+                    "description": "How many pictures to make. Each is billed."
+                  },
+                  "size": {
+                    "type": "string",
+                    "default": "auto",
+                    "description": "auto, or WIDTHxHEIGHT in pixels: 1024x1024 (square), 1536x1024 (landscape) or 1024x1536 (portrait); other sizes within OpenAI's limits are accepted by the GPT image models."
+                  },
+                  "quality": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "medium",
+                      "high",
+                      "auto"
+                    ],
+                    "default": "auto",
+                    "description": "low is cheaper and faster; high costs more."
+                  },
+                  "background": {
+                    "type": "string",
+                    "enum": [
+                      "transparent",
+                      "opaque",
+                      "auto"
+                    ],
+                    "default": "auto",
+                    "description": "transparent needs output_format png or webp."
+                  },
+                  "output_format": {
+                    "type": "string",
+                    "enum": [
+                      "png",
+                      "jpeg",
+                      "webp"
+                    ],
+                    "default": "png",
+                    "description": "The picture's file format."
+                  },
+                  "moderation": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "auto"
+                    ],
+                    "default": "auto",
+                    "description": "How strictly OpenAI filters the prompt."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The pictures, each base64 in data[].b64_json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagesResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "OpenAI refused the call: the body says why.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "ImagesResponse": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer",
+            "description": "When it was made, in Unix seconds."
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "b64_json": {
+                  "type": "string",
+                  "description": "The picture, base64-encoded."
+                }
+              }
+            }
+          },
+          "usage": {
+            "type": "object",
+            "description": "Token counts, which the bill follows.",
+            "properties": {
+              "input_tokens": {
+                "type": "integer"
+              },
+              "output_tokens": {
+                "type": "integer"
+              },
+              "total_tokens": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

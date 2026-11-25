@@ -4,7 +4,7 @@ Ready-made things your [PCP](https://pcp.gg) can take, kept by pcp.gg
 (Kaperkunde) in one public place. To start, this holds **services**:
 containers PCP can run for you on one of your own SSH servers, with the
 Docker or Podman already there, and add as tools your assistants can use
-(or, for a VPN, as an exit their web requests can go out through). Skills and API endpoints may follow.
+(or, for a VPN, as an exit their web requests can go out through). It also holds **API endpoints**: an API's OpenAPI document that PCP adds with your own key. Skills may follow.
 
 Nothing here is secret, and nothing here ever will be. Every file is plain
 text you can read before your PCP does anything with it.
@@ -19,6 +19,7 @@ text you can read before your PCP does anything with it.
 | [`services/pdf-mcp-server.yaml`](services/pdf-mcp-server.yaml) | [pdf-mcp](https://github.com/nfsarch33/pdf-mcp-server), from Kaperkunde's reviewed fork ([kaperkunde/pdf-mcp-server](https://github.com/kaperkunde/pdf-mcp-server)): reads, fills, edits, splits, merges, redacts, signs and OCRs PDFs. PCP adds it as an MCP server whose tools work only on the files in its own volume. |
 | [`services/bunq.yaml`](services/bunq.yaml) | [bunq](https://www.bunq.com), through Kaperkunde's own client ([kaperkunde/bunq-mcp](https://github.com/kaperkunde/bunq-mcp)): reads your accounts, balances, payments, payment requests, scheduled payments and cards, and prepares draft payments in EUR that only you can accept in the bunq app. PCP adds it as an MCP server; it talks to api.bunq.com only. |
 | [`services/claude-sessions.yaml`](services/claude-sessions.yaml) | Your own [Claude Code](https://claude.ai/code) cloud sessions, through Kaperkunde's own service ([kaperkunde/claude-sessions-mcp](https://github.com/kaperkunde/claude-sessions-mcp)): list them, see what one is doing, ask it a side question, send it a message, interrupt it, answer its permission prompts and questions, archive, rename or start one. PCP adds it as an MCP server. For your own account only. |
+| [`endpoints/openai-images/`](endpoints/openai-images/) | [OpenAI's Images API](https://platform.openai.com/docs/api-reference/images): makes a picture from a prompt, or changes pictures you give it. PCP adds it as an API endpoint and uses it for image generation (`generate_image`); every call is billed to the OpenAI account whose key you give it. |
 
 ### What each one needs
 
@@ -56,6 +57,8 @@ text you can read before your PCP does anything with it.
   type that address and port as `MCP_ALLOWED_HOSTS`.
 - **bunq**: Docker or Podman on the SSH server, a bunq API key (`BUNQ_API_KEY`, made in the bunq app under Profile → Security & Settings → Developers → API keys) and a long random token PCP sends it on every call (`MCP_AUTH_TOKEN`), both secrets of yours. One service per bunq user: a personal key and a business key are two services. It reads, and prepares draft payments only: no money moves until you accept a draft in the bunq app, and you may cap a draft's amount (`BUNQ_DRAFT_MAX_AMOUNT`). Payment descriptions and names come from whoever paid you, so an assistant should treat them as untrusted text. It keeps its bunq registration in its `data` volume and connects to api.bunq.com only ([what it does and how](https://github.com/kaperkunde/bunq-mcp#readme)). PCP reaches it through the SSH connection, on `127.0.0.1`.
 - **Claude Code sessions**: Docker or Podman on the SSH server, and a PCP new enough to read common-items format 6 (it makes the token PCP sends the service on every call, `MCP_AUTH_TOKEN`, itself: nothing to invent). It signs in with your own claude.ai account, once, on PCP's own sign-in page for the service: an assistant calls `connect_account`, you open the page, sign in at claude.ai and paste the code it shows there; PCP hands it to the service and keeps it nowhere, and the assistant never sees it ([more](https://github.com/kaperkunde/claude-sessions-mcp#signing-in)). The login stays in its `claude` volume and no tool ever answers a token. It uses Claude Code's unofficial sessions API: for your own sessions only, never for someone else's account. Answering a session's permission prompt or question names the exact input you approve, shown to you on PCP's page. PCP reaches it through the SSH connection, on `127.0.0.1`.
+
+- **OpenAI Images**: an OpenAI API key of yours, typed into PCP as a secret when you add it (PCP sends it as `Authorization: Bearer`). Nothing runs on your servers: PCP calls `api.openai.com` itself, only when an assistant generates or edits an image, and every call is billed to that key's OpenAI account. The default model is `gpt-image-2`; an assistant may name another.
 
 A raw WireGuard configuration (what wireproxy would take) goes into Gluetun
 as the `custom` provider above: wireproxy reads a configuration file, which

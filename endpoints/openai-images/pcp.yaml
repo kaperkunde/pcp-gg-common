@@ -1,0 +1,8 @@
+pcp_format: 2
+version: 1
+name: OpenAI Images
+description: "OpenAI's Images API for PCP's image generation: make a picture from a prompt, or change pictures you give it. Every call is billed to the OpenAI account whose API key you give PCP."
+auth:
+  kind: header
+  header: Authorization
+  template: Bearer {{secret}}
