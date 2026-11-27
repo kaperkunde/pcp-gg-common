@@ -1,7 +1,7 @@
 pcp_format: 6
 version: 1
 name: SearXNG
-description: "SearXNG: a free metasearch engine you run yourself. It asks other search engines for you, keeps no account and needs no API key, so web search costs nothing. It is meant to be PCP's web search provider (Settings → Web search → SearXNG). Its default settings answer only web pages: after launching it, put a settings.yml in its config folder that also switches on JSON (the service's put_file, then restart), as the README here says."
+description: "SearXNG: a free metasearch engine you run yourself. It asks other search engines for you, keeps no account and needs no API key, so web search costs nothing. It is meant to be PCP's web search provider (Settings → Web search → SearXNG, as a service). Its default settings answer only web pages: after launching it, put a settings.yml in its config folder that also switches on JSON (the service's put_file, then restart), as the README here says."
 image: docker.io/searxng/searxng@sha256:462d8dbeadd7c7c304be08d47084f5caba70f47a9145a01fd25990a7944e61b7
 source: docker.io/searxng/searxng:latest
 ports:
