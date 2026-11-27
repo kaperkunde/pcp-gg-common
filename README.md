@@ -20,6 +20,7 @@ text you can read before your PCP does anything with it.
 | [`services/bunq.yaml`](services/bunq.yaml) | [bunq](https://www.bunq.com), through Kaperkunde's own client ([kaperkunde/bunq-mcp](https://github.com/kaperkunde/bunq-mcp)): reads your accounts, balances, payments, payment requests, scheduled payments and cards, and prepares draft payments in EUR that only you can accept in the bunq app. PCP adds it as an MCP server; it talks to api.bunq.com only. |
 | [`services/claude-sessions.yaml`](services/claude-sessions.yaml) | Your own [Claude Code](https://claude.ai/code) cloud sessions, through Kaperkunde's own service ([kaperkunde/claude-sessions-mcp](https://github.com/kaperkunde/claude-sessions-mcp)): list them, see what one is doing, ask it a side question, send it a message, interrupt it, answer its permission prompts and questions, archive, rename or start one. PCP adds it as an MCP server. For your own account only. |
 | [`services/voyage-4-nano.yaml`](services/voyage-4-nano.yaml) | [voyage-4-nano](https://huggingface.co/MongoDB/voyage-4-nano) (MongoDB, Apache-2.0), through Kaperkunde's own server ([kaperkunde/voyage-nano-embeddings](https://github.com/kaperkunde/voyage-nano-embeddings)): a small multilingual embedding model on CPU, behind an OpenAI-compatible `/v1/embeddings`. PCP adds its API as an endpoint and can use it to search your tools, skills and memories by meaning (**Settings → Search**). |
+| [`services/searxng.yaml`](services/searxng.yaml) | [SearXNG](https://github.com/searxng/searxng): a free metasearch engine you run yourself, with no account and no API key. It is for **Settings → Web search**, so assistants can search the web at no cost; nothing is added as a server. |
 | [`endpoints/openai-images/`](endpoints/openai-images/) | [OpenAI's Images API](https://platform.openai.com/docs/api-reference/images): makes a picture from a prompt, or changes pictures you give it. PCP adds it as an API endpoint and uses it for image generation (`generate_image`); every call is billed to the OpenAI account whose key you give it. |
 
 ### What each one needs
@@ -60,6 +61,19 @@ text you can read before your PCP does anything with it.
 - **Claude Code sessions**: Docker or Podman on the SSH server, and a PCP new enough to read common-items format 6 (it makes the token PCP sends the service on every call, `MCP_AUTH_TOKEN`, itself: nothing to invent). It signs in with your own claude.ai account, once, on PCP's own sign-in page for the service: an assistant calls `connect_account`, you open the page, sign in at claude.ai and paste the code it shows there; PCP hands it to the service and keeps it nowhere, and the assistant never sees it ([more](https://github.com/kaperkunde/claude-sessions-mcp#signing-in)). The login stays in its `claude` volume and no tool ever answers a token. It uses Claude Code's unofficial sessions API: for your own sessions only, never for someone else's account. Answering a session's permission prompt or question names the exact input you approve, shown to you on PCP's page. PCP reaches it through the SSH connection, on `127.0.0.1`.
 
 - **Voyage 4 nano embeddings**: Docker or Podman on the SSH server and a PCP new enough to read common-items format 6: PCP makes the key it sends (`API_KEY`) itself. About 1.5 GB of memory and an x86-64 CPU (fastest with AVX-512 BF16, as on recent AMD Ryzen or Intel Xeon); `THREADS` caps how many cores it uses. The model is inside the image, pinned to one revision, and nothing is downloaded or sent anywhere while it runs. In **Settings → Search**, choose it as your own service and tick "Tell the model whether a text is a query or a document". PCP reaches it through the SSH connection, on `127.0.0.1`.
+- **SearXNG**: Docker or Podman on the SSH server and a PCP new enough to read common-items format 6 (PCP makes `SEARXNG_SECRET` itself: nothing to invent). No key, no account, nothing to pay: it asks public search engines for you, from your SSH server's address. It registers nothing in PCP, and it has no key, so it is published on the SSH server's `127.0.0.1` with nothing in front of it. Its default settings answer web pages only, and PCP's web search needs JSON, which SearXNG has no environment variable for. So, once it runs, an assistant writes this file into its `config` volume with the service's `put_file` (`overwrite` on, name `settings.yml`) and calls `restart`:
+
+  ```yaml
+  use_default_settings: true
+  search:
+    formats:
+      - html
+      - json
+  server:
+    limiter: false
+  ```
+
+  The secret key stays out of the file: SearXNG reads it from `SEARXNG_SECRET`. Then point **Settings → Web search** at its address. Its health check is `/healthz`.
 - **OpenAI Images**: an OpenAI API key of yours, typed into PCP as a secret when you add it (PCP sends it as `Authorization: Bearer`). Nothing runs on your servers: PCP calls `api.openai.com` itself, only when an assistant generates or edits an image, and every call is billed to that key's OpenAI account. The default model is `gpt-image-2`; an assistant may name another.
 
 A raw WireGuard configuration (what wireproxy would take) goes into Gluetun
@@ -101,7 +115,7 @@ The files follow PCP's own layout for linked repositories, so a PCP reads
 them as it reads any repository you link:
 
 ```
-services/<name>.yaml    a service (pcp_format 3, or 4 with a service's `auth` or `files`)
+services/<name>.yaml    a service (pcp_format 3, or 4 with a service's `auth` or `files`, or 6)
 README.md, LICENSE, …   nobody's item, left alone
 ```
 
