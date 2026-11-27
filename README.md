@@ -73,7 +73,7 @@ text you can read before your PCP does anything with it.
     limiter: false
   ```
 
-  The secret key stays out of the file: SearXNG reads it from `SEARXNG_SECRET`. Then point **Settings → Web search** at its address. Its health check is `/healthz`.
+  The secret key stays out of the file: SearXNG reads it from `SEARXNG_SECRET`. Then, in **Settings → Web search**, choose SearXNG **As a service** and pick it: PCP reaches it through the SSH connection, never from its own machine. Its health check is `/healthz`.
 - **OpenAI Images**: an OpenAI API key of yours, typed into PCP as a secret when you add it (PCP sends it as `Authorization: Bearer`). Nothing runs on your servers: PCP calls `api.openai.com` itself, only when an assistant generates or edits an image, and every call is billed to that key's OpenAI account. The default model is `gpt-image-2`; an assistant may name another.
 
 A raw WireGuard configuration (what wireproxy would take) goes into Gluetun
